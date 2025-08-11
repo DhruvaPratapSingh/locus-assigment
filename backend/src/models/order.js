@@ -5,11 +5,11 @@ const OrderSchema = new mongoose.Schema({
   items: [
     {
       itemId: { type: mongoose.Schema.Types.ObjectId, ref: "MenuItem" },
-      quantity: Number
-    }
+      quantity: Number,
+    },
   ],
-  status: { type: String, default: "pending" }, // pending, completed, cancelled
-  createdAt: { type: Date, default: Date.now }
+  status: { type: String, default: "pending" }, // pending, completed, cancelled, autocancelled
+  createdAt: { type: Date, default: Date.now },
 });
 
 export default mongoose.model("Order", OrderSchema);

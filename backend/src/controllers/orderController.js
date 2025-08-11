@@ -24,8 +24,16 @@ export const createOrder = async (req, res) => {
 export const cancelOrder = async (req, res) => {
   const { id } = req.params;
   const order = await Order.findById(id).populate("items.itemId");
-  
-  if (!order || order.status !== "pending") {
+
+  if (!order) {
+    return res.status(404).json({ msg: "Order not found" });
+  }
+
+  if (order.status === "cancelled") {
+    return res.status(200).json({ msg: "Order already cancelled", order });
+  }
+
+  if (order.status !== "pending") {
     return res.status(400).json({ msg: "Cannot cancel" });
   }
 
@@ -38,5 +46,16 @@ export const cancelOrder = async (req, res) => {
   order.status = "cancelled";
   await order.save();
 
-  res.json(order);
+  res.json({ msg: "Order cancelled and stock restored", order });
+};
+
+export const payOrder = async (req, res) => {
+  const { id } = req.params;
+  const order = await Order.findById(id);
+  if (!order) {
+    return res.status(404).json({ msg: "Order not found" });
+  }
+  order.status = "success";
+  await order.save();
+  res.json({ msg: "Order paid", order });
 };

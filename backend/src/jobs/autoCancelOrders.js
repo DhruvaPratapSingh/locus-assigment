@@ -5,12 +5,12 @@ import MenuItem from "../models/MenuItem.js";
 
 cron.schedule("*/1 * * * *", async () => {
   const now = new Date();
-  const cutoff = new Date(now.getTime() - 15 * 60000);
+  const cutoff = new Date(now.getTime() - 1 * 60000);
 
   try {
     const staleOrders = await Order.find({
       status: "pending",
-      createdAt: { $lt: cutoff }
+      createdAt: { $lt: cutoff },
     }).populate("items.itemId");
 
     for (const order of staleOrders) {
@@ -24,7 +24,7 @@ cron.schedule("*/1 * * * *", async () => {
         itemId.stock += quantity;
         await itemId.save();
       }
-      order.status = "cancelled";
+      order.status = "autocancelled";
       await order.save();
       console.log(`✅ Auto-cancelled order ${order._id}`);
     }
