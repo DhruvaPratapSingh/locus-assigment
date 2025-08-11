@@ -7,18 +7,28 @@ cron.schedule("*/1 * * * *", async () => {
   const now = new Date();
   const cutoff = new Date(now.getTime() - 15 * 60000);
 
-  const staleOrders = await Order.find({
-    status: "pending",
-    createdAt: { $lt: cutoff }
-  }).populate("items.itemId");
+  try {
+    const staleOrders = await Order.find({
+      status: "pending",
+      createdAt: { $lt: cutoff }
+    }).populate("items.itemId");
 
-  for (const order of staleOrders) {
-    for (const { itemId, quantity } of order.items) {
-      itemId.stock += quantity;
-      await itemId.save();
+    for (const order of staleOrders) {
+      for (const { itemId, quantity } of order.items) {
+        if (!itemId) {
+          console.warn(
+            `⚠ Skipping stock restore: Menu item not found for order ${order._id}`
+          );
+          continue;
+        }
+        itemId.stock += quantity;
+        await itemId.save();
+      }
+      order.status = "cancelled";
+      await order.save();
+      console.log(`✅ Auto-cancelled order ${order._id}`);
     }
-    order.status = "cancelled";
-    await order.save();
-    console.log(`Auto-cancelled order ${order._id}`);
+  } catch (err) {
+    console.error("❌ Error in autoCancelOrders job:", err);
   }
 });

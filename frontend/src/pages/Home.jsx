@@ -39,6 +39,7 @@ export default function Home() {
           padding: "10px",
           marginBottom: "10px"
         }}>
+        <img src={item.imageUrl || "https://via.placeholder.com/150"} alt={item.name} style={{ width: "100px", height: "100px" }} />
           <h3>{item.name}</h3>
           <p>Price: ${item.price}</p>
           <p>Stock: {item.stock}</p>
