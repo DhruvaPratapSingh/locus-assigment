@@ -1,11 +1,11 @@
-// backend/src/controllers/orderController.js
+
 import Order from "../models/order.js";
 import MenuItem from "../models/MenuItem.js";
 
 export const createOrder = async (req, res) => {
   const { items } = req.body;
 
-  // Lock stock
+  
   for (const { itemId, quantity } of items) {
     const item = await MenuItem.findById(itemId);
     if (!item || item.stock < quantity) {

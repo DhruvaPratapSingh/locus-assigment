@@ -1,4 +1,4 @@
-// backend/src/models/Order.js
+
 import mongoose from "mongoose";
 
 const OrderSchema = new mongoose.Schema({
@@ -8,7 +8,7 @@ const OrderSchema = new mongoose.Schema({
       quantity: Number,
     },
   ],
-  status: { type: String, default: "pending" }, // pending, completed, cancelled, autocancelled
+  status: { type: String, default: "pending" }, 
   createdAt: { type: Date, default: Date.now },
 });
 
