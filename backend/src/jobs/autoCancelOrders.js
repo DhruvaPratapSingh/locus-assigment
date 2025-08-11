@@ -1,4 +1,4 @@
-// backend/src/jobs/autoCancelOrders.js
+
 import cron from "node-cron";
 import Order from "../models/order.js";
 import MenuItem from "../models/MenuItem.js";

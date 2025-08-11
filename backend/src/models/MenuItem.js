@@ -1,4 +1,4 @@
-// backend/src/models/MenuItem.js
+
 import mongoose from "mongoose";
 
 const MenuItemSchema = new mongoose.Schema({
@@ -7,9 +7,9 @@ const MenuItemSchema = new mongoose.Schema({
   price: Number,
   stock: Number,
   description: String,
-  imageUrl: { type: String, default: "" }, // Optional field for image URL
+  imageUrl: { type: String, default: "" },
 }, {  
-  timestamps: true // Automatically manage createdAt and updatedAt fields
+  timestamps: true
 });
 
 export default mongoose.model("MenuItem", MenuItemSchema);
