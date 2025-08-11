@@ -5,7 +5,6 @@ import MenuItem from "../models/MenuItem.js";
 export const createOrder = async (req, res) => {
   const { items } = req.body;
 
-  // Lock stock
   for (const { itemId, quantity } of items) {
     const item = await MenuItem.findById(itemId);
     if (!item || item.stock < quantity) {
@@ -26,18 +25,9 @@ export const cancelOrder = async (req, res) => {
   const order = await Order.findById(id).populate("items.itemId");
 
   if (!order) {
-    return res.status(404).json({ msg: "Order not found" });
-  }
-
-  if (order.status === "cancelled") {
-    return res.status(200).json({ msg: "Order already cancelled", order });
-  }
-
-  if (order.status !== "pending") {
     return res.status(400).json({ msg: "Cannot cancel" });
   }
 
-  // Restore stock
   for (const { itemId, quantity } of order.items) {
     itemId.stock += quantity;
     await itemId.save();
@@ -46,16 +36,20 @@ export const cancelOrder = async (req, res) => {
   order.status = "cancelled";
   await order.save();
 
-  res.json({ msg: "Order cancelled and stock restored", order });
+  res.json(order);
 };
 
+// New controller to mark order as paid
 export const payOrder = async (req, res) => {
   const { id } = req.params;
   const order = await Order.findById(id);
-  if (!order) {
-    return res.status(404).json({ msg: "Order not found" });
-  }
-  order.status = "success";
+
+  // if (!order || order.status !== "pending") {
+  //   return res.status(400).json({ msg: "Cannot pay this order" });
+  // }
+
+  order.status = "paid";
   await order.save();
-  res.json({ msg: "Order paid", order });
+
+  res.json({ msg: "Order paid successfully", order });
 };

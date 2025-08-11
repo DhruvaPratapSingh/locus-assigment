@@ -5,7 +5,7 @@ import MenuItem from "../models/MenuItem.js";
 
 cron.schedule("*/1 * * * *", async () => {
   const now = new Date();
-  const cutoff = new Date(now.getTime() - 1 * 60000);
+  const cutoff = new Date(now.getTime() - 15 * 60000);
 
   try {
     const staleOrders = await Order.find({

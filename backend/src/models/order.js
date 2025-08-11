@@ -8,7 +8,7 @@ const OrderSchema = new mongoose.Schema({
       quantity: Number,
     },
   ],
-  status: { type: String, default: "pending" }, // pending, completed, cancelled, autocancelled
+  status: { type: String,default:"paid" }, // pending, completed, cancelled, autocancelled
   createdAt: { type: Date, default: Date.now },
 });
 

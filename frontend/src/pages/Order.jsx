@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -6,10 +6,11 @@ export default function Order() {
   const location = useLocation();
   const navigate = useNavigate();
   const order = location.state?.order;
-  const [timeLeft, setTimeLeft] = useState(1 * 60);
+  const [timeLeft, setTimeLeft] = useState(15* 60);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState("");
   const [canceling, setCanceling] = useState(false);
+  const timerRef = useRef(null);
 
   useEffect(() => {
     if (!order?._id) {
@@ -17,10 +18,10 @@ export default function Order() {
       return;
     }
 
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
-          clearInterval(timer);
+          clearInterval(timerRef.current);
           handleCancel();
           return 0;
         }
@@ -28,7 +29,7 @@ export default function Order() {
       });
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(timerRef.current);
     // eslint-disable-next-line
   }, [order]);
 
@@ -38,18 +39,32 @@ export default function Order() {
     return `${m}:${s}`;
   };
 
-  const handlePayment = async () => {};
+  const handlePayment = async () => {
+    if (!order?._id) return;
+
+    setLoading(true);
+    setNotification("Processing payment...");
+    clearInterval(timerRef.current); // Stop the timer on payment start
+
+    // Simulate payment delay (remove axios for now since you want no backend)
+    setTimeout(() => {
+      setLoading(false);
+      setNotification("✅ Payment successful! Redirecting...");
+      setTimeout(() => navigate("/"), 2000);
+    }, 3000);
+  };
 
   const handleCancel = async () => {
     if (canceling || !order?._id) return;
     setCanceling(true);
     setNotification("Cancelling order...");
+    clearInterval(timerRef.current);
     try {
       await axios.post(`http://localhost:5000/order/${order._id}/cancel`);
       setNotification("⚠ Order canceled. Stock restored.");
       setTimeout(() => navigate("/"), 2000);
     } catch (err) {
-      setNotification("❌ Failed to cancel order.");
+      setNotification("❌ Failed to cancel order.",err);
       setCanceling(false);
     }
   };
@@ -57,23 +72,17 @@ export default function Order() {
   return (
     <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-yellow-100 p-6">
       <div className="bg-white/40 backdrop-blur-md rounded-2xl shadow-xl p-8 text-center max-w-md w-full">
-        <h1 className="text-3xl font-bold text-orange-700 mb-4">
-          Payment Page
-        </h1>
+        <h1 className="text-3xl font-bold text-orange-700 mb-4">Payment Page</h1>
         <p className="text-gray-700 mb-2">
           Order ID: <span className="font-mono">{order?._id}</span>
         </p>
         <p className="text-gray-700 mb-6">
           Time left to pay/pickup:{" "}
-          <span className="font-mono text-lg text-red-600">
-            {formatTime(timeLeft)}
-          </span>
+          <span className="font-mono text-lg text-red-600">{formatTime(timeLeft)}</span>
         </p>
 
         {notification && (
-          <div className="mb-4 text-green-700 font-semibold">
-            {notification}
-          </div>
+          <div className="mb-4 text-green-700 font-semibold">{notification}</div>
         )}
 
         {loading || canceling ? (
